@@ -6,7 +6,6 @@ contract SimpleStorage {
     
     // this will get initialized to 0!
     uint256 favoriteNumber;
-    bool favoriteBool;
     
     struct People {
         uint256 favoriteNumber;
