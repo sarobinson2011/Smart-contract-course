@@ -9,6 +9,7 @@ contract FundMe {
     using SafeMath for uint256;
 
     mapping(address => uint256) public addressToAmountFunded;
+    address[] public funders;
     address public owner;
 
     constructor() {
@@ -19,6 +20,7 @@ contract FundMe {
       uint256 minimumUSD = 50 * 10 ** 18;                 
       require(getConversionRate(msg.value) >= minimumUSD, "you need to send at least $50 worth of ETH");
       addressToAmountFunded[msg.sender] += msg.value;
+      funders.push(msg.sender);
     }
 
     function getVersion() public view returns(uint256) {
@@ -40,9 +42,18 @@ contract FundMe {
       return ethAmountInUsd;
     }
 
-    function withdraw() public payable {
-      require(msg.sender == owner);
+    modifier onlyOwner {
+      require(msg.sender == owner, "this account isn't the owner");
+      _;
+    }
+
+    function withdraw() payable onlyOwner public {
       payable(msg.sender).transfer(address(this).balance);
+      for (uint256 funderIndex=0; funderIndex < funders.length; funderIndex++) {
+        address funder = funders[funderIndex];
+        addressToAmountFunded[funder] = 0;
+      }
+      funders = new address[](0);
     }
 
 }
